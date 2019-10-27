@@ -1,10 +1,19 @@
 import React from 'react'
-import { View, Text, StyleSheet } from 'react-native'
+import { ScrollView, View, Image, Text, StyleSheet, Button } from 'react-native'
 import { HeaderButtons, Item } from 'react-navigation-header-buttons'
 
 
 import { MEALS } from '../data/dummy-data'
 import HeaderButton from '../components/HeaderButton'
+
+
+const ListItem = props =>{
+    return (
+        <View style={styles.listItem}>
+            <Text>{props.children}</Text>
+        </View>
+    )
+}
 
 const MealDetailScreen = (props) => {
     const mealId = props.navigation.getParam('mealId')
@@ -12,9 +21,25 @@ const MealDetailScreen = (props) => {
     const selectedMeal = MEALS.find(meal => meal.id === mealId)
 
     return (
-        <View style={styles.screen}>
-            <Text>{selectedMeal.title}</Text>
-        </View>
+        <ScrollView>
+            <Image source={{ uri: selectedMeal.imageUrl }} style={styles.image} />
+            <View style={styles.details}>
+                <Text>{selectedMeal.duration}m</Text>
+                <Text>{selectedMeal.complexity}</Text>
+                <Text>{selectedMeal.affordability}</Text>
+            </View>
+            <Text style={styles.title}>Ingredients</Text>
+            {selectedMeal.ingredients.map(ingredient => (
+                <ListItem key={ingredient} >{ingredient}></ListItem>
+            ))}
+            <Text style={styles.title}>Steps</Text>
+            {selectedMeal.steps.map(step => (
+                <ListItem key={step} >{step}</ListItem>
+            ))}
+
+        </ScrollView>
+
+
     )
 }
 
@@ -26,11 +51,11 @@ MealDetailScreen.navigationOptions = navigationData => {
         headerTitle: selectedMeal.title,
         headerRight: (
             <HeaderButtons HeaderButtonComponent={HeaderButton}>
-                <Item title='Favorites' 
-                iconName='ios-star'
-                onPress={()=>{
+                <Item title='Favorites'
+                    iconName='ios-star'
+                    onPress={() => {
 
-                }}
+                    }}
                 />
             </HeaderButtons>
         )
@@ -39,10 +64,26 @@ MealDetailScreen.navigationOptions = navigationData => {
 }
 
 const styles = StyleSheet.create({
-    screen: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center'
+    details: {
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        padding: 15
+    },
+    image: {
+        width: '100%',
+        height: 200
+    },
+    title: {
+        fontFamily: 'open-sans-bold',
+        fontSize: 20,
+        textAlign: 'center'
+    },
+    listItem:{
+        marginHorizontal:20,
+        marginVertical:10,
+        borderColor:"#ccc",
+        borderWidth:1,
+        padding:10,
     }
 })
 
