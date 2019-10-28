@@ -1,13 +1,13 @@
-import React from 'react'
-import { ScrollView, View, Image, Text, StyleSheet, Button } from 'react-native'
+import React, { useEffect, useCallback } from 'react'
+import { ScrollView, View, Image, Text, StyleSheet } from 'react-native'
 import { HeaderButtons, Item } from 'react-navigation-header-buttons'
+import { useSelector, useDispatch } from 'react-redux'
 
-
-import { MEALS } from '../data/dummy-data'
 import HeaderButton from '../components/HeaderButton'
+import { toggleFavorite } from '../store/actions/meal'
 
 
-const ListItem = props =>{
+const ListItem = props => {
     return (
         <View style={styles.listItem}>
             <Text>{props.children}</Text>
@@ -16,9 +16,21 @@ const ListItem = props =>{
 }
 
 const MealDetailScreen = (props) => {
+    const availableMeals = useSelector(state => state.meals.meals)
+
     const mealId = props.navigation.getParam('mealId')
 
-    const selectedMeal = MEALS.find(meal => meal.id === mealId)
+    const selectedMeal = availableMeals.find(meal => meal.id === mealId)
+
+    const dispatch = useDispatch()
+
+    const toggleFavoriteHandler = useCallback(() => {
+        dispatch(toggleFavorite(mealId))
+    }, [dispatch, mealId])
+
+    useEffect(() => {
+        props.navigation.setParams({ toggleFav: toggleFavoriteHandler });
+    }, [toggleFavoriteHandler])
 
     return (
         <ScrollView>
@@ -36,26 +48,23 @@ const MealDetailScreen = (props) => {
             {selectedMeal.steps.map(step => (
                 <ListItem key={step} >{step}</ListItem>
             ))}
-
         </ScrollView>
-
-
     )
 }
 
 MealDetailScreen.navigationOptions = navigationData => {
-    const mealId = navigationData.navigation.getParam('mealId')
-    const selectedMeal = MEALS.find(meal => meal.id === mealId)
+    // const mealId = navigationData.navigation.getParam('mealId')
+    const toggleFavorite = navigationData.navigation.getParam('toggleFav')
+    const mealTitle = navigationData.navigation.getParam('mealTitle')
+    // const selectedMeal = MEALS.find(meal => meal.id === mealId)
 
     return {
-        headerTitle: selectedMeal.title,
+        headerTitle: mealTitle,
         headerRight: (
             <HeaderButtons HeaderButtonComponent={HeaderButton}>
                 <Item title='Favorites'
                     iconName='ios-star'
-                    onPress={() => {
-
-                    }}
+                    onPress={toggleFavorite}
                 />
             </HeaderButtons>
         )
@@ -78,12 +87,12 @@ const styles = StyleSheet.create({
         fontSize: 20,
         textAlign: 'center'
     },
-    listItem:{
-        marginHorizontal:20,
-        marginVertical:10,
-        borderColor:"#ccc",
-        borderWidth:1,
-        padding:10,
+    listItem: {
+        marginHorizontal: 20,
+        marginVertical: 10,
+        borderColor: "#ccc",
+        borderWidth: 1,
+        padding: 10,
     }
 })
 
